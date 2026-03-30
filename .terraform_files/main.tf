@@ -1,7 +1,7 @@
 // ================ main configurations ====================================
 terraform {
   backend "s3" {
-    profile              = "booking-terraform"
+    profile              = "booking-frontend"
     bucket               = "booking-frontend-tfstate"
     workspace_key_prefix = "environments-frontend"
     key                  = "resources.tfstate"
@@ -13,8 +13,8 @@ terraform {
 provider "aws" {
   shared_config_files = local.config_file
   region              = "eu-north-1"
-  profile             = "booking-terraform"
-  alias               = "booking-terraform"
+  profile             = "booking-frontend"
+  alias               = "booking-frontend"
 }
 
 provider "aws" {

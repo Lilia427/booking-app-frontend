@@ -34,7 +34,7 @@ jobs:
     steps:
       - checkout
       - aws-cli/setup:
-          profile_name: booking-terraform
+          profile_name: booking-frontend
       - configure_aws_credentials
       - run:
           name: Check AWS Infrastructure Changes
@@ -71,7 +71,7 @@ jobs:
     steps:
       - checkout
       - aws-cli/setup:
-          profile_name: booking-terraform
+          profile_name: booking-frontend
       - configure_aws_credentials
       - run:
           name: Install dependencies
@@ -81,7 +81,7 @@ jobs:
           command: |
             set -ex
             aws secretsmanager get-secret-value \
-              --profile booking-terraform \
+              --profile booking-frontend \
               --secret-id "${CIRCLE_BRANCH}/${PROJECT_NAME}/frontend" \
               --region $AWS_DEFAULT_REGION | jq -r '.SecretString' | \
               jq -r "to_entries|map(\"\(.key)=\\\"\(.value|tostring)\\\"\")|.[]" | sed -e 's/"//' -e 's/"$//g' > .env || echo "No environment variables found"
@@ -105,7 +105,7 @@ jobs:
       - attach_workspace:
           at: ./
       - aws-cli/setup:
-          profile_name: booking-terraform
+          profile_name: booking-frontend
       - configure_aws_credentials
       - run:
           name: Deploy codebase to AWS S3
@@ -114,17 +114,17 @@ jobs:
             # Get CloudFront Distribution ID by origin name
             cloudfront_name=${CIRCLE_BRANCH}-${PROJECT_NAME}-codebase
             export AWS_CLOUD_FRONT_ID=$(aws cloudfront list-distributions \
-              --profile booking-terraform | \
+              --profile booking-frontend | \
               jq --arg cfname "$cloudfront_name" \
               '.DistributionList.Items[] | select(.DefaultCacheBehavior.TargetOriginId | test($cfname)) | .Id' | \
               sed 's/"//g')
 
             # Sync dist/ to S3
-            cd ./dist && aws s3 sync . s3://${CIRCLE_BRANCH}-${PROJECT_NAME}-codebase --delete --profile booking-terraform
+            cd ./dist && aws s3 sync . s3://${CIRCLE_BRANCH}-${PROJECT_NAME}-codebase --delete --profile booking-frontend
 
             # Invalidate CloudFront cache
             AWS_MAX_ATTEMPTS=10 aws cloudfront create-invalidation \
-              --profile booking-terraform \
+              --profile booking-frontend \
               --distribution-id "$AWS_CLOUD_FRONT_ID" \
               --paths "/*"
 
@@ -135,7 +135,7 @@ commands:
           name: Create AWS Config File
           command: |
             echo \
-            "[profile booking-terraform]
+            "[profile booking-frontend]
             aws_access_key_id=$AWS_ACCESS_KEY_ID
             aws_secret_access_key=$AWS_SECRET_ACCESS_KEY
             region=$AWS_DEFAULT_REGION
