@@ -8,7 +8,3 @@ variable "prefix" {
   type        = string
 }
 
-variable "cloudfront_frontend_arn" {
-  description = "ARN of the CloudFront distribution allowed to read from this bucket"
-  type        = string
-}

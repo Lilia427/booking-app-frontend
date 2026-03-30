@@ -55,10 +55,33 @@ module "cloud_front" {
 }
 
 module "s3_codebase" {
-  source                  = "./modules/s3_codebase"
-  common_tags             = local.common_tags
-  prefix                  = local.prefix
-  cloudfront_frontend_arn = module.cloud_front.cloudfront_frontend_arn
+  source      = "./modules/s3_codebase"
+  common_tags = local.common_tags
+  prefix      = local.prefix
+}
+
+resource "aws_s3_bucket_policy" "codebase_policy" {
+  bucket = module.s3_codebase.bucket_name
+  policy = jsonencode({
+    Version = "2008-10-17"
+    Id      = "PolicyForCloudFrontPrivateContent"
+    Statement = [
+      {
+        Sid    = "AllowCloudFrontServicePrincipal"
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        }
+        Action   = "s3:GetObject"
+        Resource = "${module.s3_codebase.bucket_arn}/*"
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = module.cloud_front.cloudfront_frontend_arn
+          }
+        }
+      }
+    ]
+  })
 }
 
 module "secret_manager" {
