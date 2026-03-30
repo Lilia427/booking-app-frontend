@@ -14,10 +14,6 @@ resource "aws_acm_certificate" "cert_frontend" {
 provider "aws" {
   shared_config_files = ["/home/circleci/project/config"]
   region              = "us-east-1"
-  profile             = local.environment
+  profile             = "booking-frontend"
   alias               = "certificate"
-}
-
-locals {
-  environment = terraform.workspace
 }

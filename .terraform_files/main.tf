@@ -19,7 +19,7 @@ provider "aws" {
 
 provider "aws" {
   shared_config_files = local.config_file
-  profile             = local.environment
+  profile             = "booking-frontend"
   region              = local.region
 }
 
