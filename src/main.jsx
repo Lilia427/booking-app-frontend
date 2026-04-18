@@ -1,5 +1,20 @@
+import { datadogRum } from '@datadog/browser-rum';
 import * as Sentry from "@sentry/react";
 import { RoomContext } from './context/RoomContext';
+
+datadogRum.init({
+  applicationId: 'd66d978f-ef09-40b6-991e-5abb74b5ac95',
+  clientToken: 'pub7cdf58ff7c7884c841097ce34269b14a',
+  site: 'datadoghq.eu',
+  service: 'booking-frontend',
+  env: 'main',
+  version: '1.0.0',
+  sessionSampleRate: 100,
+  sessionReplaySampleRate: 20,
+  trackResources: true,
+  trackUserInteractions: true,
+  trackLongTasks: true,
+});
 import ReactDOM from 'react-dom/client'
 import React from 'react'
 import App from './App'
