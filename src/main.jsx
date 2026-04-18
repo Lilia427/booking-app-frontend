@@ -3,9 +3,9 @@ import * as Sentry from "@sentry/react";
 import { RoomContext } from './context/RoomContext';
 
 datadogRum.init({
-  applicationId: 'd66d978f-ef09-40b6-991e-5abb74b5ac95',
-  clientToken: 'pub7cdf58ff7c7884c841097ce34269b14a',
-  site: 'datadoghq.eu',
+  applicationId: '18c1ad18-4ee5-41e8-90f2-65d61d9251c9',
+  clientToken: 'pubc6592cbcd49f2e09ff41950fdcebf226',
+  site: 'us5.datadoghq.com',
   service: 'booking-frontend',
   env: 'main',
   version: '1.0.0',
@@ -14,6 +14,7 @@ datadogRum.init({
   trackResources: true,
   trackUserInteractions: true,
   trackLongTasks: true,
+  allowedTracingUrls: ['https://api.runabooking.me'],
 });
 import ReactDOM from 'react-dom/client'
 import React from 'react'
