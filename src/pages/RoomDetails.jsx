@@ -435,12 +435,6 @@ const RoomDetails = () => {
                     />
                   </div>
                 </div>
-
-                <p className='mb-4 text-sm text-primary/80'>
-                  {pricePerPersonPerNight} грн/доба × {guestCount}{' '}
-                  {guestCount === 1 ? 'особа' : guestCount < 5 ? 'особи' : 'осіб'} × {selectedDays} дн. = {totalPrice} грн
-                </p>
-
                 <button type='submit' disabled={isSubmitting} className='btn btn-lg btn-primary w-full'>
                   {isSubmitting ? 'відправка...' : `Резерв за ${totalPrice} грн`}
                 </button>
