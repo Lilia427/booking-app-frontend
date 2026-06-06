@@ -1,5 +1,6 @@
 import { AdultsDropdown, CheckIn, CheckOut, KidsDropdown, ScrollToTop } from '../components';
 import { useRoomContext } from '../context/RoomContext';
+import { formatAdultsLabel, formatKidsLabel } from '../constants/data';
 import { useParams } from 'react-router-dom';
 import { FaCheck, FaCheckCircle, FaExclamationCircle, FaTimes } from 'react-icons/fa';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -9,7 +10,7 @@ const COTTAGES_API_URL = 'https://api.runabooking.me/api/cottages';
 const RoomDetails = () => {
 
   const { id } = useParams();
-  const { rooms, adults, kids, checkIn, checkOut } = useRoomContext();
+  const { rooms, adults, kids, checkIn, checkOut, setAdults, setKids } = useRoomContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookedDateRanges, setBookedDateRanges] = useState([]);
   const [apiCottage, setApiCottage] = useState(null);
@@ -61,6 +62,7 @@ const RoomDetails = () => {
   const description = apiCottage?.description || room?.description;
   const facilities = room?.facilities ?? [];
   const price = apiCottage?.pricePerNight ?? room?.price;
+  const maxGuests = Number(apiCottage?.maxGuests ?? room?.maxGuests ?? room?.maxPerson) || 1;
   const imageLg = room?.imageLg;
   const gallery = room?.gallery;
 
@@ -181,6 +183,21 @@ const RoomDetails = () => {
     return () => controller.abort();
   }, [loadBookedDates]);
 
+  useEffect(() => {
+    const adultCount = parseInt(adults, 10) || 1;
+    const kidCount = parseInt(kids, 10) || 0;
+    const clampedAdults = Math.min(Math.max(adultCount, 1), maxGuests);
+    const clampedKids = Math.min(Math.max(kidCount, 0), Math.max(0, maxGuests - clampedAdults));
+
+    if (clampedAdults !== adultCount) {
+      setAdults(formatAdultsLabel(clampedAdults));
+    }
+
+    if (clampedKids !== kidCount) {
+      setKids(formatKidsLabel(clampedKids));
+    }
+  }, [maxGuests, roomTypeId]);
+
   const excludedDateIntervals = useMemo(
     () => bookedDateRanges.map((range) => ({ start: range.start, end: range.end })),
     [bookedDateRanges]
@@ -198,7 +215,16 @@ const RoomDetails = () => {
     return diffInDays > 0 ? diffInDays : 1;
   }, [checkIn, checkOut]);
 
-  const totalPrice = (Number(price) || 0) * selectedDays;
+  const guestCount = useMemo(() => {
+    const adultCount = parseInt(adults, 10) || 0;
+    const kidCount = parseInt(kids, 10) || 0;
+    const total = adultCount + kidCount;
+
+    return total > 0 ? total : 1;
+  }, [adults, kids]);
+
+  const pricePerPersonPerNight = Number(price) || 0;
+  const totalPrice = pricePerPersonPerNight * guestCount * selectedDays;
 
   const hotelRulesUa = [
     'Заселення після 14:00, виселення до 11:00.',
@@ -384,8 +410,8 @@ const RoomDetails = () => {
                   <h3>Ваше бронювання</h3>
                   <div className='h-[60px]'> <CheckIn excludedDateIntervals={excludedDateIntervals} /> </div>
                   <div className='h-[60px]'> <CheckOut excludedDateIntervals={excludedDateIntervals} /> </div>
-                  <div className='h-[60px]'> <AdultsDropdown /> </div>
-                  <div className='h-[60px]'> <KidsDropdown /> </div>
+                  <div className='h-[60px]'> <AdultsDropdown maxGuests={maxGuests} /> </div>
+                  <div className='h-[60px]'> <KidsDropdown maxGuests={maxGuests} /> </div>
                   <div className='h-[60px]'>
                     <input
                       type='text'
@@ -409,6 +435,11 @@ const RoomDetails = () => {
                     />
                   </div>
                 </div>
+
+                <p className='mb-4 text-sm text-primary/80'>
+                  {pricePerPersonPerNight} грн/доба × {guestCount}{' '}
+                  {guestCount === 1 ? 'особа' : guestCount < 5 ? 'особи' : 'осіб'} × {selectedDays} дн. = {totalPrice} грн
+                </p>
 
                 <button type='submit' disabled={isSubmitting} className='btn btn-lg btn-primary w-full'>
                   {isSubmitting ? 'відправка...' : `Резерв за ${totalPrice} грн`}

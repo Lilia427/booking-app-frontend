@@ -27,6 +27,7 @@ const CheckOut = ({ excludedDateIntervals = [] }) => {
         minDate={minCheckOutDate}
         excludeDateIntervals={excludedDateIntervals}
         placeholderText='Дата виїзду'
+        dateFormat='dd/MM/yyyy'
         onChange={(date) => setCheckOut(date)}
       />
 

@@ -33,6 +33,7 @@ const CheckIn = ({ excludedDateIntervals = [] }) => {
         minDate={today}
         excludeDateIntervals={excludedDateIntervals}
         placeholderText='Дата заїзду'
+        dateFormat='dd/MM/yyyy'
         onChange={handleCheckInChange}
       />
 

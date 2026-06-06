@@ -1,12 +1,19 @@
+import { useMemo } from 'react';
 import { useRoomContext } from '../context/RoomContext';
 import { BsChevronDown } from 'react-icons/bs';
-import { kidsList } from '../constants/data';
+import { getKidsOptions } from '../constants/data';
 import { Menu } from '@headlessui/react';
 
 
-const KidsDropdown = () => {
+const KidsDropdown = ({ maxGuests = 1 }) => {
 
-  const { kids, setKids } = useRoomContext();
+  const { adults, kids, setKids } = useRoomContext();
+  const adultCount = parseInt(adults, 10) || 1;
+
+  const kidsOptions = useMemo(
+    () => getKidsOptions(maxGuests, adultCount),
+    [maxGuests, adultCount]
+  );
 
 
   return (
@@ -21,14 +28,14 @@ const KidsDropdown = () => {
 
       <Menu.Items as='ul' className='bg-white absolute w-full flex flex-col z-40'>
         {
-          kidsList.map(({ name }, idx) =>
+          kidsOptions.map(({ name, value }) =>
             <Menu.Item
               as='li'
-              key={idx}
+              key={value}
               onClick={() => setKids(name)}
               className='border-b last-of-type:border-b-0 h-10 hover:bg-accent hover:text-white w-full flex items-center justify-center cursor-pointer'
             >
-              {name}
+              {name === '0 дітей' ? 'Без дітей' : name}
             </Menu.Item>
           )
         }

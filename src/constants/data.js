@@ -2,6 +2,36 @@ import { FaCheck } from "react-icons/fa";
 import images from "../assets";
 
 
+export const formatAdultsLabel = (count) => {
+  if (count === 1) return '1 дорослий';
+  return `${count} дорослих`;
+};
+
+export const formatKidsLabel = (count) => {
+  if (count === 0) return '0 дітей';
+  if (count === 1) return '1 дитина';
+  return `${count} дітей`;
+};
+
+export const getAdultsOptions = (maxGuests) => {
+  const max = Math.max(1, Number(maxGuests) || 1);
+
+  return Array.from({ length: max }, (_, index) => ({
+    value: index + 1,
+    name: formatAdultsLabel(index + 1),
+  }));
+};
+
+export const getKidsOptions = (maxGuests, adultCount) => {
+  const adults = Math.max(1, Number(adultCount) || 1);
+  const maxKids = Math.max(0, (Number(maxGuests) || 1) - adults);
+
+  return Array.from({ length: maxKids + 1 }, (_, index) => ({
+    value: index,
+    name: formatKidsLabel(index),
+  }));
+};
+
 export const adultsList = [
     { name: '1 дорослий' },
     { name: '2 дорослих' },
