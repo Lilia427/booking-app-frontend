@@ -47,7 +47,7 @@ const Room = ({ room }) => {
         to={`/room/${id}`}
         className="btn btn-secondary btn-sm max-w-[240px] mx-auto duration-300 normal-case text-center flex justify-center"
       >
-       від {displayPrice} грн/доба <br /> за 1 особу
+       Резерв за <br /> {displayPrice} грн
       </Link>
 
     </div>

@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+import '../style/datepicker.css'
 
 type Tab = 'reservations' | 'cottages'
 
@@ -381,13 +384,54 @@ const Admin: React.FC = () => {
     }
   }
 
-  const toDateInput = (val: string | undefined) =>
-    val ? val.slice(0, 10) : ''
+  const parseDateValue = (val: string | undefined): Date | null => {
+    if (!val) return null
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+      const [year, month, day] = val.split('-').map(Number)
+      return new Date(year, month - 1, day)
+    }
+
+    const parsed = new Date(val)
+    if (Number.isNaN(parsed.getTime())) return null
+    return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate())
+  }
+
+  const formatDateForApi = (date: Date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
+  const toDateInput = (val: string | undefined) => {
+    const parsed = parseDateValue(val)
+    if (!parsed) return ''
+    return formatDateForApi(parsed)
+  }
+
+  const formatDateDisplay = (val: string | undefined) => {
+    const parsed = parseDateValue(val)
+    if (!parsed) return val || '-'
+
+    const day = String(parsed.getDate()).padStart(2, '0')
+    const month = String(parsed.getMonth() + 1).padStart(2, '0')
+    const year = parsed.getFullYear()
+    return `${day}/${month}/${year}`
+  }
 
   const toDateTime = (val: string | undefined) => {
     if (!val) return '-'
     const parsed = new Date(val)
-    return Number.isNaN(parsed.getTime()) ? val : parsed.toLocaleString('uk-UA')
+    if (Number.isNaN(parsed.getTime())) return val
+
+    return parsed.toLocaleString('uk-UA', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
   }
 
   const openEdit = (r: Reservation) => {
@@ -524,13 +568,13 @@ const Admin: React.FC = () => {
 
                     <td className='px-6 py-4'>
                       <span className='inline-flex items-center gap-1 rounded-md bg-slate-700 px-2 py-1 text-lg font-medium text-slate-200'>
-                        📅 {r.checkIn}
+                        📅 {formatDateDisplay(r.checkIn)}
                       </span>
                     </td>
 
                     <td className='px-6 py-4'>
                       <span className='inline-flex items-center gap-1 rounded-md bg-slate-700 px-2 py-1 text-lg font-medium text-slate-200'>
-                        📅 {r.checkOut}
+                        📅 {formatDateDisplay(r.checkOut)}
                       </span>
                     </td>
 
@@ -699,8 +743,6 @@ const Admin: React.FC = () => {
                 [
                   { label: 'Name', key: 'name', type: 'text' },
                   { label: 'Phone', key: 'phone', type: 'tel' },
-                  { label: 'Check In', key: 'checkIn', type: 'date' },
-                  { label: 'Check Out', key: 'checkOut', type: 'date' },
                   { label: 'Adults', key: 'adults', type: 'number' },
                   { label: 'Children', key: 'children', type: 'number' },
                   { label: 'Room Name', key: 'roomName', type: 'text' },
@@ -722,6 +764,38 @@ const Admin: React.FC = () => {
                   />
                 </label>
               ))}
+
+              <label className='flex flex-col gap-1'>
+                <span className='text-xs font-medium uppercase tracking-wider text-slate-400'>Check In</span>
+                <DatePicker
+                  selected={parseDateValue(editForm.checkIn)}
+                  onChange={(date) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      checkIn: date ? formatDateForApi(date) : '',
+                    }))
+                  }
+                  dateFormat='dd/MM/yyyy'
+                  placeholderText='дд/мм/рррр'
+                  className='w-full rounded-lg bg-slate-700 px-3 py-2 text-white outline-none ring-1 ring-slate-600 focus:ring-blue-500'
+                />
+              </label>
+
+              <label className='flex flex-col gap-1'>
+                <span className='text-xs font-medium uppercase tracking-wider text-slate-400'>Check Out</span>
+                <DatePicker
+                  selected={parseDateValue(editForm.checkOut)}
+                  onChange={(date) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      checkOut: date ? formatDateForApi(date) : '',
+                    }))
+                  }
+                  dateFormat='dd/MM/yyyy'
+                  placeholderText='дд/мм/рррр'
+                  className='w-full rounded-lg bg-slate-700 px-3 py-2 text-white outline-none ring-1 ring-slate-600 focus:ring-blue-500'
+                />
+              </label>
 
               <label className='flex flex-col gap-1'>
                 <span className='text-xs font-medium uppercase tracking-wider text-slate-400'>Status</span>
